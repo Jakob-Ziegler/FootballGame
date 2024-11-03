@@ -31,6 +31,13 @@
             margin-top: 5px;
         }
 
+        .scoreboard {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 5px;
+        }
+
         .game-container {
             position: relative;
             width: 90vw;
@@ -50,16 +57,6 @@
 
         .defender {
             background-color: #4F2683;
-        }
-
-        .scoreboard {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 18px;
-            font-weight: bold;
-            text-align: center;
         }
 
         #tackleMessage, #touchdownMessage, #pauseMessage {
@@ -117,8 +114,8 @@
 <body>
     <div id="gameTitle">AI Football Game</div>
     <div id="pauseInstruction">Press ESC to Pause</div>
+    <div class="scoreboard" id="scoreboard">Vikings: 0</div>
     <div class="game-container" id="gameContainer">
-        <div class="scoreboard" id="scoreboard">Vikings: 0</div>
         <div id="player" class="player"></div>
         <div id="tackleMessage">You Got Tackled!</div>
         <div id="touchdownMessage">TOUCHDOWN!</div>
@@ -134,6 +131,8 @@
         <button onclick="startGame()">Start Game!</button>
     </div>
 
+    <audio id="tackleSound" src="vine-boom.mp3"></audio>
+
     <script>
         const gameContainer = document.getElementById("gameContainer");
         const player = document.getElementById("player");
@@ -142,6 +141,7 @@
         const touchdownMessage = document.getElementById("touchdownMessage");
         const pauseMessage = document.getElementById("pauseMessage");
         const startPopup = document.getElementById("startPopup");
+        const tackleSound = document.getElementById("tackleSound");
 
         const fieldWidth = gameContainer.offsetWidth;
         const fieldHeight = gameContainer.offsetHeight;
@@ -167,8 +167,8 @@
             for (let i = 0; i < 11; i++) {
                 const defender = document.createElement("div");
                 defender.className = "defender";
-                defender.style.left = "50%";
-                defender.style.top = Math.random() * fieldHeight + "px";
+                defender.style.left = `${fieldWidth / 2}px`; // Spawn at the 50-yard line
+                defender.style.top = `${(i / 10) * fieldHeight}px`;
                 gameContainer.appendChild(defender);
                 defenders.push(defender);
             }
@@ -199,6 +199,7 @@
             isGameOver = true;
             if (reason === "tackle") {
                 tackleMessage.style.display = "block";
+                tackleSound.play(); // Play sound when tackled
             } else if (reason === "touchdown") {
                 touchdownMessage.style.display = "block";
                 score += 6;
@@ -254,6 +255,7 @@
             if (isMoving["ArrowRight"] && playerX < fieldWidth - 50) playerX += speed;
             updatePlayerPosition();
 
+            // Check if player reached the endzone
             if (playerX > fieldWidth - 70) {
                 endGame("touchdown");
             }
