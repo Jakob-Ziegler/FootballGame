@@ -132,6 +132,7 @@
     </div>
 
     <audio id="tackleSound" src="vine-boom.mp3"></audio>
+    <audio id="touchdownSound" src="Touchdown sound effect.mp3"></audio>
 
     <script>
         const gameContainer = document.getElementById("gameContainer");
@@ -142,6 +143,7 @@
         const pauseMessage = document.getElementById("pauseMessage");
         const startPopup = document.getElementById("startPopup");
         const tackleSound = document.getElementById("tackleSound");
+        const touchdownSound = document.getElementById("touchdownSound");
 
         const fieldWidth = gameContainer.offsetWidth;
         const fieldHeight = gameContainer.offsetHeight;
@@ -199,11 +201,14 @@
             isGameOver = true;
             if (reason === "tackle") {
                 tackleMessage.style.display = "block";
-                tackleSound.play(); // Play sound when tackled
+                tackleSound.currentTime = 0; // Reset sound to play instantly
+                tackleSound.play(); 
             } else if (reason === "touchdown") {
                 touchdownMessage.style.display = "block";
                 score += 6;
                 scoreboard.textContent = `Vikings: ${score}`;
+                touchdownSound.currentTime = 0; // Reset sound to play instantly
+                touchdownSound.play();
             }
             setTimeout(() => {
                 resetGame();
@@ -255,8 +260,8 @@
             if (isMoving["ArrowRight"] && playerX < fieldWidth - 50) playerX += speed;
             updatePlayerPosition();
 
-            // Check if player reached the endzone
-            if (playerX > fieldWidth - 70) {
+            // Check if player reached the extended endzone
+            if (playerX > fieldWidth - 214.5) { // Adjusted for larger endzone area
                 endGame("touchdown");
             }
         }
