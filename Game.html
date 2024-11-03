@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Football Game</title>
+    <title>Vikings Football Game</title>
     <style>
         body, html {
             margin: 0;
@@ -20,27 +20,17 @@
 
         #game-title, #pause-instruction {
             font-size: 24px;
-            font-weight: bold;
-            color: #FFD700;
             margin: 10px 0;
-            text-align: center;
         }
 
         .game-container {
             position: relative;
             width: 90vw;
-            height: 60vh;
-            background: #4F8A10;
+            height: 70vh;
+            background: url('vikings field.png') no-repeat center center;
+            background-size: cover;
             border: 5px solid #fff;
             overflow: hidden;
-        }
-
-        .yard-line {
-            position: absolute;
-            width: 2px;
-            height: 100%;
-            background: #fff;
-            opacity: 0.5;
         }
 
         .endzone {
@@ -68,9 +58,7 @@
             position: absolute;
         }
 
-        .defender {
-            background-color: #4F2683;
-        }
+        .defender { background-color: #4F2683; }
 
         .scoreboard {
             position: absolute;
@@ -79,7 +67,6 @@
             transform: translateX(-50%);
             font-size: 18px;
             font-weight: bold;
-            text-align: center;
         }
 
         #tackle-message, #touchdown-message, #pause-message {
@@ -93,84 +80,61 @@
         }
 
         #tackle-message { color: red; }
-        #touchdown-message, #pause-message { color: white; }
+        #touchdown-message { color: white; }
+        #pause-message { color: white; }
 
+        /* Start Game Popup */
         #start-popup {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.8);
+            color: white;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
-            color: #fff;
-            text-align: center;
-            z-index: 100;
-        }
-
-        #start-popup h1 {
-            font-size: 30px;
-            margin-bottom: 20px;
-        }
-
-        #start-popup ul {
-            list-style-type: disc;
-            text-align: left;
-            margin-bottom: 30px;
+            align-items: center;
             font-size: 18px;
         }
 
+        #start-popup h1 { font-size: 32px; margin-bottom: 20px; }
+        #start-popup ul { margin-bottom: 30px; text-align: left; }
         #start-popup button {
             padding: 10px 20px;
-            font-size: 18px;
-            font-weight: bold;
-            background-color: #FFD700;
+            font-size: 20px;
+            background-color: #4F2683;
+            color: #fff;
             border: none;
             cursor: pointer;
-            color: #4F2683;
-            border-radius: 5px;
+            margin-top: 20px;
         }
 
-        .logo {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 50px;
-            height: 50px;
-            transform: translate(-50%, -50%);
-            background-image: url('viking.png');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-        }
     </style>
 </head>
 <body>
     <div id="game-title">AI Football Game</div>
     <div id="pause-instruction">Press ESC to Pause</div>
-
     <div class="game-container" id="gameContainer">
         <div class="scoreboard" id="scoreboard">Vikings: 0</div>
         <div class="endzone endzone-left">VIKINGS</div>
         <div class="endzone endzone-right">VIKINGS</div>
         <div id="player" class="player"></div>
-        <div class="logo"></div>
         <div id="tackle-message">You Got Tackled!</div>
         <div id="touchdown-message">TOUCHDOWN!</div>
         <div id="pause-message">Paused</div>
     </div>
 
+    <!-- Start Game Popup -->
     <div id="start-popup">
-        <h1>AI Football Game</h1>
+        <h1>Welcome to AI Football Game!</h1>
         <ul>
             <li>Use the arrow keys to move your character!</li>
             <li>Avoid the defenders and score touchdowns!</li>
             <li>Have fun!</li>
         </ul>
-        <button id="start-button">Start Game!</button>
+        <button onclick="startGame()">Start Game!</button>
     </div>
 
     <script>
@@ -181,16 +145,21 @@
         const touchdownMessage = document.getElementById("touchdown-message");
         const pauseMessage = document.getElementById("pause-message");
         const startPopup = document.getElementById("start-popup");
-        const startButton = document.getElementById("start-button");
 
-        let fieldWidth = gameContainer.offsetWidth;
-        let fieldHeight = gameContainer.offsetHeight;
+        const fieldWidth = gameContainer.offsetWidth;
+        const fieldHeight = gameContainer.offsetHeight;
+
         let score = 0;
         let playerX = 50;
         let playerY = fieldHeight / 2 - 10;
         let isGameOver = false;
         let isPaused = false;
-        let isGameStarted = false;
+        let moving = { up: false, down: false, left: false, right: false };
+
+        function startGame() {
+            startPopup.style.display = "none";
+            gameLoop();
+        }
 
         function updatePlayerPosition() {
             player.style.left = `${playerX}px`;
@@ -213,12 +182,14 @@
             for (let i = 0; i < 11; i++) {
                 const defender = document.createElement("div");
                 defender.className = "defender";
-                defender.style.left = "400px"; // Spawn at the 50-yard line
+                defender.style.left = "400px";
                 defender.style.top = Math.random() * fieldHeight + "px";
                 gameContainer.appendChild(defender);
                 defenders.push(defender);
             }
         }
+
+        spawnDefenders();
 
         function moveDefenders() {
             defenders.forEach(defender => {
@@ -248,9 +219,7 @@
                 score += 6;
                 scoreboard.textContent = `Vikings: ${score}`;
             }
-            setTimeout(() => {
-                resetGame();
-            }, 2000);
+            setTimeout(() => resetGame(), 2000);
         }
 
         function resetGame() {
@@ -266,32 +235,38 @@
         function togglePause() {
             isPaused = !isPaused;
             pauseMessage.style.display = isPaused ? "block" : "none";
-            if (!isPaused) {
-                gameLoop();
-            } else {
-                cancelAnimationFrame(gameLoopId);
-            }
         }
 
-        let keys = {};
         document.addEventListener("keydown", (e) => {
             if (e.key === "Escape") {
                 togglePause();
                 return;
             }
-            keys[e.key] = true;
+            if (isGameOver || isPaused) return;
+
+            switch (e.key) {
+                case "ArrowUp": moving.up = true; break;
+                case "ArrowDown": moving.down = true; break;
+                case "ArrowLeft": moving.left = true; break;
+                case "ArrowRight": moving.right = true; break;
+            }
         });
 
         document.addEventListener("keyup", (e) => {
-            keys[e.key] = false;
+            switch (e.key) {
+                case "ArrowUp": moving.up = false; break;
+                case "ArrowDown": moving.down = false; break;
+                case "ArrowLeft": moving.left = false; break;
+                case "ArrowRight": moving.right = false; break;
+            }
         });
 
         function movePlayer() {
-            const speed = 5;
-            if (keys["ArrowUp"] && playerY > 0) playerY -= speed;
-            if (keys["ArrowDown"] && playerY < fieldHeight - 20) playerY += speed;
-            if (keys["ArrowLeft"] && playerX > 0) playerX -= speed;
-            if (keys["ArrowRight"] && playerX < fieldWidth - 50) playerX += speed;
+            const speed = 2;
+            if (moving.up && playerY > 0) playerY -= speed;
+            if (moving.down && playerY < fieldHeight - 20) playerY += speed;
+            if (moving.left && playerX > 0) playerX -= speed;
+            if (moving.right && playerX < fieldWidth - 50) playerX += speed;
 
             updatePlayerPosition();
 
@@ -302,20 +277,12 @@
 
         let gameLoopId;
         function gameLoop() {
-            if (!isGameOver && !isPaused && isGameStarted) {
+            if (!isGameOver && !isPaused) {
                 movePlayer();
                 moveDefenders();
             }
             gameLoopId = requestAnimationFrame(gameLoop);
         }
-
-        startButton.addEventListener("click", () => {
-            startPopup.style.display = "none";
-            isGameStarted = true;
-            gameLoop();
-        });
-
-        gameLoop();
     </script>
 </body>
 </html>
