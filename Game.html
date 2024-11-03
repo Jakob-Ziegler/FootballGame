@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Football Game</title>
+    <title>Vikings Football Game</title>
     <style>
         body, html {
             margin: 0;
@@ -102,81 +102,86 @@
             color: red;
         }
 
-        #touchdown-message {
+        #touchdown-message, #pause-message {
             color: white;
         }
 
-        #pause-message {
-            color: white;
-        }
-
-        #start-popup {
+        /* Popup styling */
+        #intro-popup {
             position: absolute;
-            width: 400px;
-            height: 250px;
-            background-color: #4F2683;
-            color: #FFD700;
-            border: 3px solid #fff;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
             display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: center;
-            justify-content: space-between;
+            color: #fff;
             text-align: center;
-            font-size: 16px;
+            z-index: 10;
         }
 
-        #start-popup h2 {
-            margin-top: 0;
+        #intro-popup h1 {
+            font-size: 30px;
+            margin-bottom: 20px;
+        }
+
+        #intro-popup ul {
+            list-style: none;
+            padding: 0;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        #intro-popup li {
+            margin: 10px 0;
         }
 
         #start-button {
+            padding: 10px 20px;
+            font-size: 18px;
             background-color: #FFC62F;
             color: #4F2683;
             border: none;
-            padding: 10px 20px;
-            font-size: 16px;
             cursor: pointer;
-            font-weight: bold;
+            border-radius: 5px;
         }
 
-        #viking-logo {
+        /* Logo styling */
+        .center-logo {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 100px;
-            height: 100px;
+            width: 50px;
+            height: 50px;
             background: url('viking.png') no-repeat center center;
             background-size: contain;
-            opacity: 0.8;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
+    <div id="intro-popup">
+        <h1>AI Football Game</h1>
+        <ul>
+            <li>• Use the arrow keys to move your character!</li>
+            <li>• Avoid the defenders and score touchdowns!</li>
+            <li>• Have fun!</li>
+        </ul>
+        <button id="start-button">Start Game!</button>
+    </div>
+
     <div class="game-container" id="gameContainer">
         <div class="scoreboard" id="scoreboard">Vikings: 0</div>
         <div id="pause-instruction">Press ESC to pause</div>
         <div class="endzone endzone-left">VIKINGS</div>
         <div class="endzone endzone-right">VIKINGS</div>
-        <div id="viking-logo"></div>
+        <div class="center-logo"></div>
         <div id="player" class="player"></div>
         <div id="tackle-message">You Got Tackled!</div>
         <div id="touchdown-message">TOUCHDOWN!</div>
         <div id="pause-message">Paused</div>
-    </div>
-
-    <div id="start-popup">
-        <h2>AI Football Game</h2>
-        <ul>
-            <li>Use the arrow keys to move your character!</li>
-            <li>Avoid the defenders and make it to the opposite endzone!</li>
-            <li>Have fun!</li>
-        </ul>
-        <button id="start-button">Start Game!</button>
     </div>
 
     <script>
@@ -187,7 +192,8 @@
         const tackleMessage = document.getElementById("tackle-message");
         const touchdownMessage = document.getElementById("touchdown-message");
         const pauseMessage = document.getElementById("pause-message");
-        const startPopup = document.getElementById("start-popup");
+
+        const introPopup = document.getElementById("intro-popup");
         const startButton = document.getElementById("start-button");
 
         const fieldWidth = gameContainer.offsetWidth;
@@ -198,7 +204,6 @@
         let playerY = fieldHeight / 2 - 10;
         let isGameOver = false;
         let isPaused = false;
-        let speed = 0;
 
         function updatePlayerPosition() {
             player.style.left = `${playerX}px`;
@@ -269,7 +274,6 @@
             touchdownMessage.style.display = "none";
             playerX = 50;
             playerY = fieldHeight / 2 - 10;
-            speed = 5;
             updatePlayerPosition();
             spawnDefenders();
         }
@@ -288,33 +292,4 @@
             if (e.key === "Escape") {
                 togglePause();
                 return;
-            }
-            if (isGameOver || isPaused) return;
-
-            const speedIncrement = 0.2;
-            if (e.key === "ArrowUp") speed -= speedIncrement;
-            if (e.key === "ArrowDown") speed += speedIncrement;
-            if (e.key === "ArrowLeft") playerX -= speed;
-            if (e.key === "ArrowRight") playerX += speed;
-
-            playerY = Math.max(0, Math.min(fieldHeight - 20, playerY));
-            playerX = Math.max(0, Math.min(fieldWidth - 20, playerX));
-            updatePlayerPosition();
-        });
-
-        startButton.addEventListener("click", () => {
-            startPopup.style.display = "none";
-            speed = 5;
-            gameLoop();
-        });
-
-        let gameLoopId;
-        function gameLoop() {
-            if (!isGameOver && !isPaused) {
-                moveDefenders();
-                gameLoopId = requestAnimationFrame(gameLoop);
-            }
-        }
-    </script>
-</body>
-</html>
+           
