@@ -10,7 +10,7 @@
             padding: 0;
             overflow: hidden;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             height: 100vh;
             background-color: #4F2683;
@@ -18,12 +18,21 @@
             font-family: Arial, sans-serif;
         }
 
+        #game-title, #pause-instruction {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+            margin: 10px 0;
+            text-align: center;
+        }
+
         .game-container {
             position: relative;
-            width: 1000px; /* Increased width */
-            height: 500px; /* Increased height */
+            width: 90vw;
+            height: 60vh;
             background: #4F8A10;
             border: 5px solid #fff;
+            overflow: hidden;
         }
 
         .yard-line {
@@ -48,13 +57,8 @@
             writing-mode: vertical-rl;
         }
 
-        .endzone-left {
-            left: 0;
-        }
-
-        .endzone-right {
-            right: 0;
-        }
+        .endzone-left { left: 0; }
+        .endzone-right { right: 0; }
 
         .player, .defender {
             width: 20px;
@@ -78,16 +82,6 @@
             text-align: center;
         }
 
-        #pause-instruction {
-            position: absolute;
-            top: 10px; /* Moved to top */
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 16px;
-            color: #FFD700;
-            text-align: center;
-        }
-
         #tackle-message, #touchdown-message, #pause-message {
             position: absolute;
             top: 50%;
@@ -98,105 +92,105 @@
             display: none;
         }
 
-        #tackle-message {
-            color: red;
-        }
+        #tackle-message { color: red; }
+        #touchdown-message, #pause-message { color: white; }
 
-        #touchdown-message {
-            color: white;
-        }
-
-        #pause-message {
-            color: white;
-        }
-
-        .popup {
+        #start-popup {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(255, 255, 255, 0.9);
-            color: #000;
-            padding: 20px;
-            border-radius: 10px;
-            display: none;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
             text-align: center;
-            z-index: 10;
+            z-index: 100;
         }
 
-        .popup h2 {
-            margin: 0;
-            font-size: 24px;
+        #start-popup h1 {
+            font-size: 30px;
+            margin-bottom: 20px;
         }
 
-        .popup ul {
-            list-style-type: none;
-            padding: 0;
+        #start-popup ul {
+            list-style-type: disc;
+            text-align: left;
+            margin-bottom: 30px;
+            font-size: 18px;
         }
 
-        .popup button {
-            margin-top: 20px;
+        #start-popup button {
             padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4F8A10;
-            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #FFD700;
             border: none;
-            border-radius: 5px;
             cursor: pointer;
+            color: #4F2683;
+            border-radius: 5px;
         }
 
         .logo {
             position: absolute;
             top: 50%;
             left: 50%;
+            width: 50px;
+            height: 50px;
             transform: translate(-50%, -50%);
-            width: 100px; /* Adjust size as needed */
-            height: auto;
+            background-image: url('viking.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
         }
     </style>
 </head>
 <body>
-    <div class="popup" id="startPopup">
-        <h2>AI Football Game</h2>
+    <div id="game-title">AI Football Game</div>
+    <div id="pause-instruction">Press ESC to Pause</div>
+
+    <div class="game-container" id="gameContainer">
+        <div class="scoreboard" id="scoreboard">Vikings: 0</div>
+        <div class="endzone endzone-left">VIKINGS</div>
+        <div class="endzone endzone-right">VIKINGS</div>
+        <div id="player" class="player"></div>
+        <div class="logo"></div>
+        <div id="tackle-message">You Got Tackled!</div>
+        <div id="touchdown-message">TOUCHDOWN!</div>
+        <div id="pause-message">Paused</div>
+    </div>
+
+    <div id="start-popup">
+        <h1>AI Football Game</h1>
         <ul>
             <li>Use the arrow keys to move your character!</li>
             <li>Avoid the defenders and score touchdowns!</li>
             <li>Have fun!</li>
         </ul>
-        <button id="startButton">Start Game!</button>
-    </div>
-
-    <div class="game-container" id="gameContainer">
-        <div class="scoreboard" id="scoreboard">Vikings: 0</div>
-        <div id="pause-instruction">Press ESC to pause</div>
-        <div class="endzone endzone-left">VIKINGS</div>
-        <div class="endzone endzone-right">VIKINGS</div>
-        <img src="viking.png" alt="Viking Logo" class="logo" id="vikingLogo"> <!-- Viking logo -->
-        <div id="player" class="player"></div>
-        <div id="tackle-message">You Got Tackled!</div>
-        <div id="touchdown-message">TOUCHDOWN!</div>
-        <div id="pause-message">Paused</div>
+        <button id="start-button">Start Game!</button>
     </div>
 
     <script>
         const gameContainer = document.getElementById("gameContainer");
         const player = document.getElementById("player");
         const scoreboard = document.getElementById("scoreboard");
-        const pauseInstruction = document.getElementById("pause-instruction");
         const tackleMessage = document.getElementById("tackle-message");
         const touchdownMessage = document.getElementById("touchdown-message");
         const pauseMessage = document.getElementById("pause-message");
-        const startPopup = document.getElementById("startPopup");
-        const startButton = document.getElementById("startButton");
+        const startPopup = document.getElementById("start-popup");
+        const startButton = document.getElementById("start-button");
 
-        const fieldWidth = gameContainer.offsetWidth;
-        const fieldHeight = gameContainer.offsetHeight;
-
+        let fieldWidth = gameContainer.offsetWidth;
+        let fieldHeight = gameContainer.offsetHeight;
         let score = 0;
         let playerX = 50;
         let playerY = fieldHeight / 2 - 10;
         let isGameOver = false;
         let isPaused = false;
+        let isGameStarted = false;
 
         function updatePlayerPosition() {
             player.style.left = `${playerX}px`;
@@ -279,56 +273,49 @@
             }
         }
 
+        let keys = {};
         document.addEventListener("keydown", (e) => {
             if (e.key === "Escape") {
                 togglePause();
                 return;
             }
-            if (isGameOver || isPaused) return;
-
-            const speed = 5;
-            if (e.key === "ArrowUp" && playerY > 0) {
-                playerY -= speed;
-            } else if (e.key === "ArrowDown" && playerY < fieldHeight - 20) {
-                playerY += speed;
-            } else if (e.key === "ArrowLeft" && playerX > 0) {
-                playerX -= speed;
-            } else if (e.key === "ArrowRight" && playerX < fieldWidth - 20) {
-                playerX += speed;
-            }
-            updatePlayerPosition();
+            keys[e.key] = true;
         });
 
         document.addEventListener("keyup", (e) => {
-            if (isGameOver || isPaused) return;
-            if (e.key === "ArrowUp") playerY = Math.max(0, playerY - 5);
-            else if (e.key === "ArrowDown") playerY = Math.min(fieldHeight - 20, playerY + 5);
-            else if (e.key === "ArrowLeft") playerX = Math.max(0, playerX - 5);
-            else if (e.key === "ArrowRight") playerX = Math.min(fieldWidth - 20, playerX + 5);
-            updatePlayerPosition();
+            keys[e.key] = false;
         });
 
+        function movePlayer() {
+            const speed = 5;
+            if (keys["ArrowUp"] && playerY > 0) playerY -= speed;
+            if (keys["ArrowDown"] && playerY < fieldHeight - 20) playerY += speed;
+            if (keys["ArrowLeft"] && playerX > 0) playerX -= speed;
+            if (keys["ArrowRight"] && playerX < fieldWidth - 50) playerX += speed;
+
+            updatePlayerPosition();
+
+            if (playerX > fieldWidth - 70) {
+                endGame("touchdown");
+            }
+        }
+
+        let gameLoopId;
         function gameLoop() {
-            if (!isPaused) {
+            if (!isGameOver && !isPaused && isGameStarted) {
+                movePlayer();
                 moveDefenders();
-                updatePlayerPosition();
-                defenders.forEach(defender => {
-                    if (parseFloat(defender.style.left) >= fieldWidth - 50) {
-                        endGame("touchdown");
-                    }
-                });
             }
             gameLoopId = requestAnimationFrame(gameLoop);
         }
 
         startButton.addEventListener("click", () => {
-            startPopup.style.display = "none"; // Hide the start popup
-            spawnDefenders(); // Spawn defenders at the start
-            gameLoop(); // Start the game loop
+            startPopup.style.display = "none";
+            isGameStarted = true;
+            gameLoop();
         });
 
-        // Show the popup at the beginning
-        startPopup.style.display = "block";
+        gameLoop();
     </script>
 </body>
 </html>
